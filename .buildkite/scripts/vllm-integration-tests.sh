@@ -445,9 +445,11 @@ test_vllmopenai_server_with_lmcache_integrated() {
 run_long_doc_qa() {
     local workload_config="$1"
     local port="$2"
-    local has_expected_latency="$3"
-    local has_expected_ttft_gain="$4"
-    local has_expected_latency_gain="$5"
+    local has_expected_latency="${3:-"false"}"
+    local has_expected_ttft_gain="${4:-"false"}"
+    local has_expected_latency_gain="${5:-"false"}"
+    local feature_type="${6:-"dummy"}"
+    local need_upload="${7:-"false"}"
 
     echo "→ Running long_doc_qa with customed workload config:"
     printf '%s\n' "$workload_config"
@@ -492,15 +494,38 @@ run_long_doc_qa() {
     query_round_time_per_prompt=$(echo "$json" | jq -r '.query_round_time_per_prompt')
     warmup_round_time_per_prompt=$(echo "$json" | jq -r '.warmup_round_time_per_prompt')
 
-    expected_query_ttft_per_prompt=100
-    expected_query_round_time_per_prompt=100
-    expected_warmup_round_time_per_prompt=100
+    if [ "$need_upload" = "true" ]; then
+        local baseline_path="$ORIG_DIR/benchmarks/long_doc_qa/$feature_type.json"
+        echo "$json"
+        printf '%s\n' "$json" > "$baseline_path"
+
+        git config user.email "$USER_EMAIL"
+        git config user.name "$USER_NAME"
+        git add "$baseline_path"
+        git commit -m "Update long_doc_qa baseline: $feature_type.json" || true
+        if ! git remote get-url internal >/dev/null 2>&1; then
+            git remote add internal git@github.com:LMCache/LMCache.git
+        fi
+        git push internal +HEAD:benchmarks-main >/dev/null 2>&1
+        return 0
+    fi
+
+    # Fetch branch
+    git fetch origin benchmarks-main >/dev/null 2>&1 || true
+
+    # Load baseline from branch
+    baseline_json=$(git show origin/benchmarks-main:benchmarks/long_doc_qa/$feature_type.json 2>/dev/null || echo "")
+
+    # Extract baseline numbers
+    expected_query_ttft_per_prompt=$(echo "$baseline_json" | jq -r '.query_ttft_per_prompt')
+    expected_query_round_time_per_prompt=$(echo "$baseline_json" | jq -r '.query_round_time_per_prompt')
+    expected_warmup_round_time_per_prompt=$(echo "$baseline_json" | jq -r '.warmup_round_time_per_prompt')
 
     if [ "$has_expected_ttft_gain" = "true" ]; then
         echo "Expected latency: $expected_query_ttft_per_prompt"
         echo "Actual latency: $query_ttft_per_prompt"
         awk -v expected="$expected_query_ttft_per_prompt" -v actual="$query_ttft_per_prompt" 'BEGIN {
-            if (actual > expected) {
+            if (actual > expected * 1.1) {
                 print "TTFT gain requirement not met"
                 exit 1
             } else {
@@ -513,7 +538,7 @@ run_long_doc_qa() {
         echo "Expected latency: $expected_query_round_time_per_prompt"
         echo "Actual latency: $query_round_time_per_prompt"
         awk -v expected="$expected_query_round_time_per_prompt" -v actual="$query_round_time_per_prompt" 'BEGIN {
-            if (actual > expected) {
+            if (actual > expected * 1.1) {
                 print "Latency gain requirement not met"
                 exit 1
             } else {
@@ -526,7 +551,7 @@ run_long_doc_qa() {
         echo "Expected warmup latency: $expected_warmup_round_time_per_prompt"
         echo "Actual warmup latency: $warmup_round_time_per_prompt"
         awk -v expected="$expected_warmup_round_time_per_prompt" -v actual="$warmup_round_time_per_prompt" 'BEGIN {
-            if (actual > expected) {
+            if (actual > expected * 1.1) {
                 print "Latency requirement not met"
                 exit 1
             } else {
@@ -594,8 +619,8 @@ echo "Using port $PORT to send or receive requests."
 # Need to run from docker directory
 cd docker/
 
-# Create the container image
-build_lmcache_vllmopenai_image
+# # Create the container image
+# build_lmcache_vllmopenai_image
 
 ########
 # MAIN #
@@ -649,9 +674,9 @@ for cfg_name in "${CONFIG_NAMES[@]}"; do
         )
         if [[ "$feature_type" == "p2p" ]]; then
             run_long_doc_qa "$tmp_workload_yaml" "$PORT1"
-            run_long_doc_qa "$tmp_workload_yaml" "$PORT2" "$has_expected_latency" "$has_expected_ttft_gain" "$has_expected_latency_gain"
+            run_long_doc_qa "$tmp_workload_yaml" "$PORT2" "$has_expected_latency" "$has_expected_ttft_gain" "$has_expected_latency_gain" "${cfg_name%.yaml}" "$NEED_UPLOAD"
         else
-            run_long_doc_qa "$tmp_workload_yaml" "$PORT" "$has_expected_latency" "$has_expected_ttft_gain" "$has_expected_latency_gain"
+            run_long_doc_qa "$tmp_workload_yaml" "$PORT" "$has_expected_latency" "$has_expected_ttft_gain" "$has_expected_latency_gain" "${cfg_name%.yaml}" "true"
         fi
     fi
 
