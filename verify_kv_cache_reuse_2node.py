@@ -37,15 +37,19 @@ TOKENIZER_NAME = os.environ.get("TOKENIZER_NAME", MODEL_NAME)
 PREFILL_MAX_TOKENS = int(os.environ.get("PREFILL_MAX_TOKENS", "1"))  # prefillでは1トークンだけ生成
 
 # デフォルトのプロンプト設定
-# 注意: LMCacheのchunk_size（通常256トークン）以上になるように長いプロンプトを使用
-BASE_PROMPT = os.environ.get(
-    "BASE_PROMPT",
-    "The history of artificial intelligence dates back to ancient times, when philosophers and mathematicians began to explore the concept of creating machines that could think and reason like humans. However, the modern field of AI as we know it today began in the 1950s with the work of pioneers like Alan Turing, who proposed the Turing Test as a way to measure machine intelligence. "
-    "In the following decades, AI research progressed through several phases. The 1960s saw the development of early expert systems and natural language processing programs. Researchers like John McCarthy, Marvin Minsky, and others laid the groundwork for what would become modern AI. "
-    "The 1970s brought about more sophisticated approaches to problem-solving and knowledge representation. During this period, the field faced what became known as the 'AI winter' - a time when funding and interest in AI research declined due to unmet expectations. "
-    "Despite these challenges, the 1980s witnessed a resurgence in AI research, particularly in machine learning and neural networks. The backpropagation algorithm, developed during this time, became a cornerstone of modern deep learning. "
-    "The 1990s and early 2000s saw significant advances in statistical learning methods, support vector machines, and the development of more powerful computing hardware that enabled the training of larger neural networks."
+# 公式ドキュメントの例に合わせ、同一フレーズを繰り返して長文化し、chunk_size(256)超を確実にする
+LONG_PROMPT_MULTIPLIER = int(os.environ.get("LONG_PROMPT_MULTIPLIER", "20"))
+PROMPT_PHRASE = os.environ.get(
+    "PROMPT_PHRASE",
+    "Explain the significance of KV cache in language models."
 )
+
+# BASE_PROMPT は PHRASE の繰り返しで生成（BASE_PROMPT を環境変数で直接指定した場合はそちらを優先）
+_ENV_BASE_PROMPT = os.environ.get("BASE_PROMPT", None)
+if _ENV_BASE_PROMPT:
+    BASE_PROMPT = _ENV_BASE_PROMPT
+else:
+    BASE_PROMPT = " ".join([PROMPT_PHRASE] * LONG_PROMPT_MULTIPLIER)
 
 # 2回目も同一プロンプトを送る（完全一致でプレフィックス一致を保証）
 FOLLOW_UP_PROMPT = os.environ.get(
@@ -278,14 +282,24 @@ def run_decode(prompt: str, max_tokens: int) -> Tuple[str, float, float, Dict]:
 
 def parse_lmcache_log_line(line: str) -> Optional[Dict[str, int]]:
     """vLLMサーバーログからLMCacheのキャッシュヒット情報を抽出する"""
-    pattern = r'LMCache INFO: Reqid: ([^,]+), Total tokens (\d+), LMCache hit tokens: (\d+), need to load: (\d+)'
+    pattern = r'LMCache INFO: Reqid: ([^,]+), Total tokens (\d+), LMCache hit tokens: ([\d]+|None), need to load: (-?\d+)'
     match = re.search(pattern, line)
     if match:
+        hit_raw = match.group(3)
+        try:
+            hit_val = int(hit_raw)
+        except Exception:
+            hit_val = 0
+        need_raw = match.group(4)
+        try:
+            need_val = int(need_raw)
+        except Exception:
+            need_val = 0
         return {
             'req_id': match.group(1),
             'total_tokens': int(match.group(2)),
-            'hit_tokens': int(match.group(3)),
-            'need_to_load': int(match.group(4)),
+            'hit_tokens': hit_val,
+            'need_to_load': need_val,
         }
     return None
 
@@ -332,6 +346,20 @@ def main():
     logger.info("=" * 80)
     logger.info("Prefillサーバー: %s", PREFILL_URL)
     logger.info("Decodeサーバー: %s", DECODE_URL)
+    logger.info("長さ補強倍率 (LONG_PROMPT_MULTIPLIER): %d", LONG_PROMPT_MULTIPLIER)
+    
+    # transformers が無い場合やプロンプトが短い場合は強制的に長文化
+    if not TRANSFORMERS_AVAILABLE:
+        if LONG_PROMPT_MULTIPLIER > 1:
+            logger.warning("transformersなしのため、BASE_PROMPTを %dx 繰り返して長文化します", LONG_PROMPT_MULTIPLIER)
+            globals()['BASE_PROMPT'] = BASE_PROMPT * LONG_PROMPT_MULTIPLIER
+            globals()['FOLLOW_UP_PROMPT'] = FOLLOW_UP_PROMPT * LONG_PROMPT_MULTIPLIER
+    else:
+        # transformersがあっても明示的に倍率を指定されたら長文化
+        if LONG_PROMPT_MULTIPLIER > 1:
+            logger.info("BASE_PROMPTを %dx 繰り返して長文化します", LONG_PROMPT_MULTIPLIER)
+            globals()['BASE_PROMPT'] = BASE_PROMPT * LONG_PROMPT_MULTIPLIER
+            globals()['FOLLOW_UP_PROMPT'] = FOLLOW_UP_PROMPT * LONG_PROMPT_MULTIPLIER
     
     init_tokenizer()
     
