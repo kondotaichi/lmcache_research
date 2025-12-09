@@ -43,7 +43,7 @@ class RegisterMsg(WorkerMsg):
     ip: str
     port: int
     # URL for actual KV cache transfer, only useful when p2p is enabled
-    peer_init_url: Optional[str]
+    peer_init_url: Optional[str] = None
 
     def describe(self) -> str:
         return (

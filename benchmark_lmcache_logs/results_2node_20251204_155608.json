@@ -1,0 +1,144 @@
+{
+  "timestamp": "20251204_155608",
+  "config": {
+    "prefill_url": "http://192.168.110.13:8010/v1/completions",
+    "decode_url": "http://192.168.110.97:8011/v1/completions",
+    "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "base_prompt_tokens": 602,
+    "generation_lengths": [
+      128,
+      256,
+      512
+    ],
+    "concurrency_levels": [
+      1
+    ],
+    "cache_clear_method": "unique_prompt"
+  },
+  "patterns": [
+    {
+      "pattern_id": "P1",
+      "generation_tokens": 128,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 177.9679239998586,
+      "TBT_avg_ms": 2354.0296760002093,
+      "prefill_time_avg_ms": 89.08298899996225,
+      "kv_transfer_avg_ms": 0.06429199993363,
+      "decode_time_avg_ms": 2176.0617520003507,
+      "tokens_per_s_avg": 0.0,
+      "TTFT_p50_ms": 177.9679239998586,
+      "TTFT_p95_ms": 177.9679239998586,
+      "TBT_p50_ms": 2354.0296760002093,
+      "TBT_p95_ms": 2354.0296760002093,
+      "requests": [
+        {
+          "pattern_id": "P1",
+          "prompt_len": 631,
+          "output_len": 128,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 2317.076548782,
+          "t_first_token": 2317.254516706,
+          "t_last_token": 2319.430578458,
+          "ttft_ms": 177.9679239998586,
+          "tbt_ms": 2354.0296760002093,
+          "prefill_time_ms": 89.08298899996225,
+          "kv_transfer_ms": 0.06429199993363,
+          "decode_time_ms": 2176.0617520003507,
+          "total_tokens": 0,
+          "tokens_per_s": 0.0,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    },
+    {
+      "pattern_id": "P2",
+      "generation_tokens": 256,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 150.79235799976232,
+      "TBT_avg_ms": 4521.635836999849,
+      "prefill_time_avg_ms": 78.33271200024683,
+      "kv_transfer_avg_ms": 0.0473799996143498,
+      "decode_time_avg_ms": 4370.8434790000865,
+      "tokens_per_s_avg": 0.0,
+      "TTFT_p50_ms": 150.79235799976232,
+      "TTFT_p95_ms": 150.79235799976232,
+      "TBT_p50_ms": 4521.635836999849,
+      "TBT_p95_ms": 4521.635836999849,
+      "requests": [
+        {
+          "pattern_id": "P2",
+          "prompt_len": 629,
+          "output_len": 256,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 2320.431760923,
+          "t_first_token": 2320.582553281,
+          "t_last_token": 2324.95339676,
+          "ttft_ms": 150.79235799976232,
+          "tbt_ms": 4521.635836999849,
+          "prefill_time_ms": 78.33271200024683,
+          "kv_transfer_ms": 0.0473799996143498,
+          "decode_time_ms": 4370.8434790000865,
+          "total_tokens": 0,
+          "tokens_per_s": 0.0,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    },
+    {
+      "pattern_id": "P3",
+      "generation_tokens": 512,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 157.4856910001472,
+      "TBT_avg_ms": 8921.707570000308,
+      "prefill_time_avg_ms": 79.06906799962599,
+      "kv_transfer_avg_ms": 0.052308000704215374,
+      "decode_time_avg_ms": 8764.22187900016,
+      "tokens_per_s_avg": 0.0,
+      "TTFT_p50_ms": 157.4856910001472,
+      "TTFT_p95_ms": 157.4856910001472,
+      "TBT_p50_ms": 8921.707570000308,
+      "TBT_p95_ms": 8921.707570000308,
+      "requests": [
+        {
+          "pattern_id": "P3",
+          "prompt_len": 633,
+          "output_len": 512,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 2325.954631067,
+          "t_first_token": 2326.112116758,
+          "t_last_token": 2334.876338637,
+          "ttft_ms": 157.4856910001472,
+          "tbt_ms": 8921.707570000308,
+          "prefill_time_ms": 79.06906799962599,
+          "kv_transfer_ms": 0.052308000704215374,
+          "decode_time_ms": 8764.22187900016,
+          "total_tokens": 0,
+          "tokens_per_s": 0.0,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    }
+  ],
+  "resource_logs": {
+    "gpu_dmon": "benchmark_lmcache_logs/gpu_dmon_20251204_155608.log",
+    "cpu_sar": "benchmark_lmcache_logs/cpu_sar_20251204_155608.log"
+  }
+}

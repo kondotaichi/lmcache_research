@@ -1,0 +1,143 @@
+{
+  "timestamp": "20251204_164452",
+  "config": {
+    "vllm_url": "http://localhost:8010/v1/completions",
+    "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "base_prompt_tokens": 602,
+    "generation_lengths": [
+      128,
+      256,
+      512
+    ],
+    "concurrency_levels": [
+      1
+    ],
+    "cache_clear_method": "unique_prompt"
+  },
+  "patterns": [
+    {
+      "pattern_id": "P1",
+      "generation_tokens": 128,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 91.14942899941525,
+      "TBT_avg_ms": null,
+      "prefill_time_avg_ms": 91.14942899941525,
+      "kv_transfer_avg_ms": 0.0,
+      "decode_time_avg_ms": null,
+      "tokens_per_s_avg": null,
+      "TTFT_p50_ms": 91.14942899941525,
+      "TTFT_p95_ms": 91.14942899941525,
+      "TBT_p50_ms": null,
+      "TBT_p95_ms": null,
+      "requests": [
+        {
+          "pattern_id": "P1",
+          "prompt_len": 631,
+          "output_len": 128,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 5241.276861221,
+          "t_first_token": 5241.36801065,
+          "t_last_token": null,
+          "ttft_ms": 91.14942899941525,
+          "tbt_ms": null,
+          "prefill_time_ms": 91.14942899941525,
+          "kv_transfer_ms": 0.0,
+          "decode_time_ms": null,
+          "total_tokens": 0,
+          "tokens_per_s": null,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    },
+    {
+      "pattern_id": "P2",
+      "generation_tokens": 256,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 77.95320599961997,
+      "TBT_avg_ms": null,
+      "prefill_time_avg_ms": 77.95320599961997,
+      "kv_transfer_avg_ms": 0.0,
+      "decode_time_avg_ms": null,
+      "tokens_per_s_avg": null,
+      "TTFT_p50_ms": 77.95320599961997,
+      "TTFT_p95_ms": 77.95320599961997,
+      "TBT_p50_ms": null,
+      "TBT_p95_ms": null,
+      "requests": [
+        {
+          "pattern_id": "P2",
+          "prompt_len": 632,
+          "output_len": 256,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 5244.606620179,
+          "t_first_token": 5244.684573385,
+          "t_last_token": null,
+          "ttft_ms": 77.95320599961997,
+          "tbt_ms": null,
+          "prefill_time_ms": 77.95320599961997,
+          "kv_transfer_ms": 0.0,
+          "decode_time_ms": null,
+          "total_tokens": 0,
+          "tokens_per_s": null,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    },
+    {
+      "pattern_id": "P3",
+      "generation_tokens": 512,
+      "concurrency": 1,
+      "num_requests": 1,
+      "success_count": 1,
+      "error_count": 0,
+      "error_rate": 0.0,
+      "TTFT_avg_ms": 77.66270899992378,
+      "TBT_avg_ms": null,
+      "prefill_time_avg_ms": 77.66270899992378,
+      "kv_transfer_avg_ms": 0.0,
+      "decode_time_avg_ms": null,
+      "tokens_per_s_avg": null,
+      "TTFT_p50_ms": 77.66270899992378,
+      "TTFT_p95_ms": 77.66270899992378,
+      "TBT_p50_ms": null,
+      "TBT_p95_ms": null,
+      "requests": [
+        {
+          "pattern_id": "P3",
+          "prompt_len": 630,
+          "output_len": 512,
+          "concurrency": 1,
+          "request_id": 0,
+          "t_req_start": 5250.174042418,
+          "t_first_token": 5250.251705127,
+          "t_last_token": null,
+          "ttft_ms": 77.66270899992378,
+          "tbt_ms": null,
+          "prefill_time_ms": 77.66270899992378,
+          "kv_transfer_ms": 0.0,
+          "decode_time_ms": null,
+          "total_tokens": 0,
+          "tokens_per_s": null,
+          "status": "ok",
+          "error_type": null
+        }
+      ]
+    }
+  ],
+  "resource_logs": {
+    "gpu_dmon": "benchmark_lmcache_logs/gpu_dmon_20251204_164452.log",
+    "cpu_sar": "benchmark_lmcache_logs/cpu_sar_20251204_164452.log"
+  }
+}
